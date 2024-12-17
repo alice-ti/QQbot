@@ -17,16 +17,22 @@ export class BotController {
       } = body.d;
 
       // 构建回复消息
-      const replyContent = `你好，我收到了你的消息：${content}`;
+      // const replyContent = `你好，我收到了你的消息：${content}`;
 
-      const replyMessage: ReplyTextMessage = {
-        msg_type: 0,
-        content: replyContent,
-        msg_id: id,
-      };
-
+      // const replyMessage: ReplyTextMessage = {
+      //   msg_type: 0,
+      //   content: replyContent,
+      //   msg_id: id,
+      // };
       // 发送回复
-      await this.botService.sendMessage(group_openid, replyMessage);
+      // await this.botService.sendMessage(group_openid, replyMessage);
+
+      // TTS 语音合成
+      await this.botService.sendTTSMessage(group_openid, {
+        msg_id: id,
+        content: content,
+        msg_type: 7, // 语音消息类型
+      });
     }
   }
 }

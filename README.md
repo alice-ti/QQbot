@@ -14,7 +14,7 @@
 
 灰度期间，原有机器人仍可使用 `websocket` 事件链路接收事件推送。
 
-## 事件订阅
+### 事件订阅
 
 ```md
 GUILDS (1 << 0)
@@ -83,6 +83,35 @@ PUBLIC_GUILD_MESSAGES (1 << 30) // 消息事件，此为公域的消息事件
   - PUBLIC_MESSAGE_DELETE   // 当频道的消息被删除时
 ```
 
-## 参考文章
+事件接收响应结果如下
+
+```typescript
+{
+ eventType: 'GROUP_AT_MESSAGE_CREATE',
+ eventId: 'GROUP_AT_MESSAGE_CREATE:qdtawy6rufj9ziciulptyfvpd84zm7lk9q6pumnyjuv957wseidnfe0ixfc6s',
+ msg: {
+  author: {
+   id: '7193745BFE7C7D3C30C96678ABBB5F48',
+   member_openid: '7193745BFE7C7D3C30C96678ABBB5F48'
+  },
+  content: ' 12434',
+  group_id: 'A85B11B27A39FB0C238B0F19FA09DDF7',
+  group_openid: 'A85B11B27A39FB0C238B0F19FA09DDF7',
+  id: 'ROBOT1.0_QD.TAWY6RUfJ9ZicIULpTzch-F9MKMiKg1RG04Gel8V2I.0HgXgR0D8UfhgqMN2Jy0bzWi8-PDzwfCMemkroZw!!',
+  timestamp: '2023-11-10T10:44:07+08:00'
+ }
+}
+```
+
+### 参考文章
 
 - [nodejs开发QQ群聊机器人-wf](https://blog.csdn.net/weixin_53932236/article/details/140794468)
+- [2023 年最新QQ群机器人](https://blog.csdn.net/qq_47452807/article/details/134317472)
+
+## Azure TTS
+
+- [Azure 快速入门：将文本转换为语音](https://learn.microsoft.com/zh-cn/azure/ai-services/speech-service/get-started-text-to-speech?tabs=windows%2Cterminal&pivots=programming-language-javascript)
+
+- [快速入门：安装语音 SDK](https://learn.microsoft.com/zh-cn/azure/ai-services/speech-service/quickstarts/setup-platform?tabs=windows%2Cubuntu%2Cdotnetcli%2Cdotnet%2Cjre%2Cmaven%2Cnodejs%2Cmac%2Cpypi&pivots=programming-language-javascript)
+
+###
