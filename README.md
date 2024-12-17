@@ -114,4 +114,36 @@ PUBLIC_GUILD_MESSAGES (1 << 30) // 消息事件，此为公域的消息事件
 
 - [快速入门：安装语音 SDK](https://learn.microsoft.com/zh-cn/azure/ai-services/speech-service/quickstarts/setup-platform?tabs=windows%2Cubuntu%2Cdotnetcli%2Cdotnet%2Cjre%2Cmaven%2Cnodejs%2Cmac%2Cpypi&pivots=programming-language-javascript)
 
-###
+### 接入流程
+
+  `window` 下使用步骤，`linux` 待补充(TODO)
+
+1. 使用 Azure 订阅帐户创建一个语音服务资源。
+  `.env` 文件中配置 `AZURE_SPEECH_KEY` 和 `AZURE_SPEECH_REGION`。
+
+2. 安装语音 SDK。
+
+    ```bash
+    npm install @azure/cognitiveservices-speech-sdk
+    ```
+
+3. 发送群聊语音
+  使用 `ffmpeg` 进行转换
+      1. 下载 `ffmpeg`
+            - 下载 `ffmpeg` [下载地址](https://github.com/BtbN/FFmpeg-Builds/releases)
+            - 解压到 `X:\16-Soft\ffmpeg-master-latest-win64-gpl\bin`
+            - 配置环境变量 **此电脑-属性-高级属性设置-环境变量-PATH中新增** `X:\16-Soft\ffmpeg-master-latest-win64-gpl\bin`
+            - 使用 `ffmpeg -i input.mp3 output.wav` 进行转换
+
+      2. 下载 [`silk-v3-decoder`](https://github.com/kn007/silk-v3-decoder/releases)
+
+            - 下载后解压到 `ffmpeg` 目录下
+
+示例
+
+``` typescript
+const encodeSilk = () => {
+    execSync('ffmpeg -i "initaudio.mp3" -f s16le -ar 24000 -ac 1 -acodec pcm_s16le "outaudio.pcm"');
+    execSync('silk_v3_encoder "outaudio.pcm" "qq.silk" -tencent')
+}
+```
