@@ -4,9 +4,9 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Request, Response, NextFunction } from 'express';
 import * as nacl from 'tweetnacl';
-import { botConfig } from '../../config';
 
 // 辅助函数：将 Uint8Array 转换为十六进制字符串
 function toHex(buffer: Uint8Array): string {
@@ -17,7 +17,11 @@ function toHex(buffer: Uint8Array): string {
 
 @Injectable()
 export class SignatureMiddleware implements NestMiddleware {
-  private botSecret = botConfig.clientSecret;
+  private botSecret: string;
+  constructor(private configService: ConfigService) {
+    this.botSecret = this.configService.get<string>('QQ_SECRET');
+  }
+
   use(req: Request, res: Response, next: NextFunction) {
     try {
       console.log('SignatureMiddleware', req?.body);

@@ -108,7 +108,7 @@ PUBLIC_GUILD_MESSAGES (1 << 30) // 消息事件，此为公域的消息事件
 - [nodejs开发QQ群聊机器人-wf](https://blog.csdn.net/weixin_53932236/article/details/140794468)
 - [2023 年最新QQ群机器人](https://blog.csdn.net/qq_47452807/article/details/134317472)
 
-## Azure TTS
+## [Azure TTS](https://portal.azure.com/#home)
 
 - [Azure 快速入门：将文本转换为语音](https://learn.microsoft.com/zh-cn/azure/ai-services/speech-service/get-started-text-to-speech?tabs=windows%2Cterminal&pivots=programming-language-javascript)
 

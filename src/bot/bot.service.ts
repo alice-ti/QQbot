@@ -6,13 +6,17 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { BaseMessage } from './bot.message.dto';
 import { TtsService } from '../modules/tts/tts.service';
-import { botConfig } from '../config';
 import { AudioConverterService } from './ffmpeg.service';
 
 @Injectable()
 export class BotService implements OnModuleInit {
   private readonly logger = new Logger(BotService.name);
   private readonly TEMP_DIR: string;
+  private readonly NGROK_URL: string;
+  private readonly botConfig: {
+    appId: string;
+    clientSecret: string;
+  };
   private accessToken: string;
   private tokenExpireTime: number;
 
@@ -22,6 +26,11 @@ export class BotService implements OnModuleInit {
     private configService: ConfigService,
   ) {
     this.TEMP_DIR = this.configService.get<string>('AUDIO_TEMP_DIR');
+    this.NGROK_URL = this.configService.get<string>('NGROK_PATH');
+    this.botConfig = {
+      appId: this.configService.get<string>('QQ_APP_ID'),
+      clientSecret: this.configService.get<string>('QQ_CLIENT_SECRET'),
+    };
   }
 
   async onModuleInit() {
@@ -38,8 +47,8 @@ export class BotService implements OnModuleInit {
       const response = await axios.post(
         'https://bots.qq.com/app/getAppAccessToken',
         {
-          appId: botConfig.appId,
-          clientSecret: botConfig.clientSecret,
+          appId: this.botConfig.appId,
+          clientSecret: this.botConfig.clientSecret,
         },
       );
 
@@ -102,10 +111,9 @@ export class BotService implements OnModuleInit {
         await this.AudioConverterService.convertToSilk(tempFilePath);
       tempSilkPath = fileUrl;
 
-      // const fileUrl =
-      //   'https://3dc9-116-211-87-200.ngrok-free.app/uploads/audio/help.silk';
+      // const fileUrl = 'xxx.com/uploads/audio/help.silk';
 
-      const uploadUrl = `https://3dc9-116-211-87-200.ngrok-free.app/${fileUrl.replace(/\\/g, '/')}`;
+      const uploadUrl = `${this.NGROK_URL}/${fileUrl.replace(/\\/g, '/')}`;
 
       console.log('File URL:', fileUrl);
       console.log('File UPLOAD URL:', uploadUrl);
