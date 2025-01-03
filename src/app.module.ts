@@ -5,9 +5,9 @@ import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BotModule } from './bot/bot.module';
-import { WebhookModule } from './webhook/webhook.module';
-import { SignatureMiddleware } from './middleware/signature/signature.middleware';
 import { TtsModule } from './modules/tts/tts.module';
+import { SignatureMiddleware } from './middleware/signature/signature.middleware';
+// import { QQSignatureMiddleware } from './middleware/auth/qqsignature.middleware';
 
 @Module({
   imports: [
@@ -19,7 +19,6 @@ import { TtsModule } from './modules/tts/tts.module';
       isGlobal: true,
     }),
     BotModule,
-    WebhookModule,
     TtsModule,
   ],
   controllers: [AppController],
@@ -27,6 +26,9 @@ import { TtsModule } from './modules/tts/tts.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(SignatureMiddleware).forRoutes('bot/webhook'); // 应用到 webhook 路由
+    consumer
+      // .apply(QQSignatureMiddleware, SignatureMiddleware)
+      .apply(SignatureMiddleware)
+      .forRoutes('bot/webhook'); // 应用到 webhook 路由
   }
 }

@@ -28,8 +28,8 @@ export class BotService implements OnModuleInit {
     this.TEMP_DIR = this.configService.get<string>('AUDIO_TEMP_DIR');
     this.NGROK_URL = this.configService.get<string>('NGROK_PATH');
     this.botConfig = {
-      appId: this.configService.get<string>('QQ_APP_ID'),
-      clientSecret: this.configService.get<string>('QQ_CLIENT_SECRET'),
+      appId: this.configService.get<string>('QQ_APPID'),
+      clientSecret: this.configService.get<string>('QQ_SECRET'),
     };
   }
 

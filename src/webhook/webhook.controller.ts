@@ -30,6 +30,7 @@ export class WebhookController {
     @Req() request: RawBodyRequest<Request>,
   ) {
     try {
+      console.log('Callback-Request');
       // 获取原始body
       const rawBody = request.rawBody?.toString() || '';
 

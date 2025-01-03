@@ -10,7 +10,7 @@ async function bootstrap() {
     express.json({
       verify: (req: any, res, buf) => {
         // 存储原始请求体
-        req.rawBody = buf;
+        req.rawBody = buf.toString();
       },
     }),
   );
