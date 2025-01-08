@@ -136,7 +136,7 @@ PUBLIC_GUILD_MESSAGES (1 << 30) // 消息事件，此为公域的消息事件
             - 使用 `ffmpeg -i input.mp3 output.wav` 进行转换
 
       2. 下载 [`silk-v3-decoder`](https://github.com/kn007/silk-v3-decoder/releases)
-
+            > [懒人必备](project/silk-v3-decoder.zip)
             - 下载后解压到 `ffmpeg` 目录下
 
 示例
