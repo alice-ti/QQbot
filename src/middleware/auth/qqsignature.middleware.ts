@@ -1,100 +1,64 @@
-import {
-  Injectable,
-  NestMiddleware,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
+import { ConfigService } from '@nestjs/config';
 import * as nacl from 'tweetnacl';
-
-// 定义 KeyPair 接口
-interface KeyPair {
-  publicKey: Uint8Array;
-  secretKey: Uint8Array;
-}
-
-// 辅助函数：将十六进制字符串转换为 Uint8Array
-function hexToUint8Array(hexString: string): Uint8Array {
-  const pairs = hexString.match(/[\dA-F]{2}/gi);
-  if (!pairs) {
-    throw new Error('Invalid hex string');
-  }
-  return new Uint8Array(pairs.map((byte) => parseInt(byte, 16)));
-}
 
 @Injectable()
 export class QQSignatureMiddleware implements NestMiddleware {
-  private readonly botSecret: string = 'naOC0ocQE3shWLAfffVLB1rhYPG7';
-  constructor() {}
+  private botSecret: string;
 
-  private generateKeyPair(botSecret: string): KeyPair {
-    // 生成seed
-    let seed = botSecret;
-    while (seed.length < 32) {
-      seed = seed.repeat(2);
-    }
-    seed = seed.substring(0, 32);
-
-    // console.log('QQSignatureMiddleware-Seed:', seed);
-
-    // 将seed转换为Uint8Array
-    const seedBytes = new TextEncoder().encode(seed);
-
-    // 生成密钥对
-    return nacl.sign.keyPair.fromSeed(seedBytes);
+  constructor(private configService: ConfigService) {
+    this.botSecret = this.configService.get<string>('QQ_SECRET');
   }
 
-  use(req: Request, res: Response, next: NextFunction) {
+  async use(req: Request, res: Response, next: NextFunction) {
     try {
-      console.log('QQSignatureMiddleware-Request:', req.headers);
-      console.log('QQSignatureMiddleware-Body:', req.body);
-      // 获取请求头中的签名和时间戳
-      const signature = req.header('X-Signature-Ed25519');
-      const timestamp = req.header('X-Signature-Timestamp');
-
-      if (!signature || !timestamp) {
-        throw new HttpException(
-          'Missing signature headers',
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
-
-      // 获取请求体
+      const signature = req.headers['x-signature-ed25519'] as string;
+      const timestamp = req.headers['x-signature-timestamp'] as string;
       const body = JSON.stringify(req.body);
 
-      // 组合消息
-      const message = new TextEncoder().encode(`${timestamp}${body}`);
+      if (!signature || !timestamp) {
+        return res.status(401).json({ error: 'Missing signature headers' });
+      }
 
-      console.log('Timestamp:', timestamp);
-      console.log('Body:', body);
-      console.log('Combined message:', `${timestamp}${body}`);
+      if (!this.botSecret) {
+        return res.status(500).json({ error: 'Bot secret not configured' });
+      }
 
-      // 解码签名
-      const signatureBytes = hexToUint8Array(signature);
+      // 生成签名种子
+      let seed = this.botSecret;
+      while (seed.length < 32) {
+        seed = seed.repeat(2);
+      }
+      seed = seed.slice(0, 32);
 
       // 生成密钥对
-      const keyPair = this.generateKeyPair(this.botSecret);
+      const seedUint8Array = new TextEncoder().encode(seed);
+      const keyPair = nacl.sign.keyPair.fromSeed(seedUint8Array);
+
+      // 构建签名消息
+      const msg = `${timestamp}${body}`;
+      const msgUint8 = new TextEncoder().encode(msg);
+
+      // 将十六进制签名转换为 Uint8Array
+      const signatureUint8 = new Uint8Array(Buffer.from(signature, 'hex'));
 
       // 验证签名
       const isValid = nacl.sign.detached.verify(
-        message,
-        signatureBytes,
+        msgUint8,
+        signatureUint8,
         keyPair.publicKey,
       );
 
-      console.log('QQSignatureMiddleware-isValid:', isValid);
-
       if (!isValid) {
-        throw new HttpException('Invalid signature', HttpStatus.UNAUTHORIZED);
+        return res.status(401).json({ error: 'Invalid signature' });
       }
+      console.log('签名验证成功');
 
       next();
     } catch (error) {
-      console.log('Error:', error);
-      throw new HttpException(
-        'Signature verification failed',
-        HttpStatus.UNAUTHORIZED,
-      );
+      console.error('Signature verification error:', error);
+      return res.status(401).json({ error: 'Signature verification failed' });
     }
   }
 }
