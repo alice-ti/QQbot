@@ -1,11 +1,24 @@
 import { Controller, Post, Body, Get } from '@nestjs/common';
 import { BotService } from './bot.service';
 import { ReplyTextMessage } from './bot.message.dto';
-// import { SignatureGuard } from '../guards/signature/signature.guard';
+import { BotCommand } from './constants/commands';
+import { TTSCommandHandler } from './handlers/tts-command.handler';
+import { CommandHandler } from './interfaces/command-handler.interface';
 
 @Controller('bot')
 export class BotController {
-  constructor(private readonly botService: BotService) {}
+  private commandHandlers: Map<string, CommandHandler>;
+
+  constructor(
+    private readonly botService: BotService,
+    private readonly ttsHandler: TTSCommandHandler,
+  ) {
+    // 初始化指令处理器映射
+    this.commandHandlers = new Map([
+      [BotCommand.TTS, ttsHandler],
+      // 后续可以添加更多指令处理器
+    ]);
+  }
 
   @Get('test')
   async test() {
@@ -13,44 +26,35 @@ export class BotController {
   }
 
   @Post('webhook')
-  // @UseGuards(SignatureGuard)
   async handleWebhook(@Body() body: any) {
-    const INSTRUCTION_LIST = {
-      TTS: '/TTS',
-    };
-
-    // 检查是否是群聊@消息事件
     if (body.t === 'GROUP_AT_MESSAGE_CREATE') {
-      const {
-        id, // 消息id
-        group_openid, // 群聊的openid
-        content, // 消息内容
-      } = body.d;
+      const { id, group_openid, content } = body.d;
 
-      if (content.startsWith(INSTRUCTION_LIST.TTS)) {
-        // TTS 语音合成
+      // 获取指令
+      const command = Object.values(BotCommand).find((cmd) =>
+        content.startsWith(cmd),
+      );
 
-        const _content = content.replace(INSTRUCTION_LIST.TTS, '').trim();
-
-        await this.botService.sendTTSMessage(group_openid, {
-          msg_id: id,
-          content: _content,
-          msg_type: 7, // 语音消息类型
-        });
+      if (command) {
+        // 获取对应的指令处理器
+        const handler = this.commandHandlers.get(command);
+        if (handler) {
+          await handler.handle({
+            content,
+            groupOpenid: group_openid,
+            messageId: id,
+          });
+          return;
+        }
       }
-      // 正常回复消息
-      else {
-        // 构建回复消息
-        const replyContent = `你好，我收到了你的消息：${content}`;
 
-        const replyMessage: ReplyTextMessage = {
-          msg_type: 0,
-          content: replyContent,
-          msg_id: id,
-        };
-        // 发送回复;
-        await this.botService.sendMessage(group_openid, replyMessage);
-      }
+      // 默认消息回复
+      const replyMessage: ReplyTextMessage = {
+        msg_type: 0,
+        content: `你好，我收到了你的消息：${content}`,
+        msg_id: id,
+      };
+      await this.botService.sendMessage(group_openid, replyMessage);
     }
   }
 }

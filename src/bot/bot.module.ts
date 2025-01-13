@@ -5,10 +5,11 @@ import { BotController } from './bot.controller';
 import { TtsService } from 'src/modules/tts/tts.service';
 import { ConfigModule } from '@nestjs/config';
 import { AudioConverterService } from './ffmpeg.service';
+import { TTSCommandHandler } from './handlers/tts-command.handler';
 
 @Module({
   imports: [ConfigModule],
-  providers: [BotService, TtsService, AudioConverterService],
+  providers: [BotService, TTSCommandHandler, TtsService, AudioConverterService],
   exports: [BotService],
   controllers: [BotController],
 })
