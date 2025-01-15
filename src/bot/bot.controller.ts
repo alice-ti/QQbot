@@ -3,6 +3,7 @@ import { BotService } from './bot.service';
 import { ReplyTextMessage } from './bot.message.dto';
 import { BotCommand } from './constants/commands';
 import { TTSCommandHandler } from './handlers/tts-command.handler';
+import { SongCommandHandler } from './handlers/song-command.handler';
 import { CommandHandler } from './interfaces/command-handler.interface';
 
 @Controller('bot')
@@ -12,11 +13,11 @@ export class BotController {
   constructor(
     private readonly botService: BotService,
     private readonly ttsHandler: TTSCommandHandler,
+    private readonly songHandler: SongCommandHandler,
   ) {
-    // 初始化指令处理器映射
-    this.commandHandlers = new Map([
+    this.commandHandlers = new Map<BotCommand, CommandHandler>([
       [BotCommand.TTS, ttsHandler],
-      // 后续可以添加更多指令处理器
+      [BotCommand.SONG, songHandler],
     ]);
   }
 
@@ -32,11 +33,11 @@ export class BotController {
 
       // 获取指令
       const command = Object.values(BotCommand).find((cmd) =>
-        content.startsWith(cmd),
+        content.trim().startsWith(cmd),
       );
 
+      console.log('webhook-command', command);
       if (command) {
-        // 获取对应的指令处理器
         const handler = this.commandHandlers.get(command);
         if (handler) {
           await handler.handle({

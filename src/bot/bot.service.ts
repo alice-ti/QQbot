@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { BaseMessage } from './bot.message.dto';
 import { TtsService } from '../modules/tts/tts.service';
+import { MusicService } from '../modules/music/music.service';
 import { AudioConverterService } from './ffmpeg.service';
 
 @Injectable()
@@ -21,9 +22,10 @@ export class BotService implements OnModuleInit {
   private tokenExpireTime: number;
 
   constructor(
-    private readonly AudioConverterService: AudioConverterService,
-    private readonly azureService: TtsService,
-    private configService: ConfigService,
+    private readonly audioConverterService: AudioConverterService,
+    private readonly ttsService: TtsService,
+    private readonly musicService: MusicService,
+    private readonly configService: ConfigService,
   ) {
     this.TEMP_DIR = this.configService.get<string>('AUDIO_TEMP_DIR');
     this.NGROK_URL = this.configService.get<string>('NGROK_PATH');
@@ -84,6 +86,120 @@ export class BotService implements OnModuleInit {
     }
   }
 
+  // 发送点歌消息
+  async sendSongMessage(group_openid: string, message?: BaseMessage) {
+    if (!this.accessToken || Date.now() >= this.tokenExpireTime) {
+      await this.getAccessToken();
+    }
+
+    try {
+      const [source, songName] = message?.content
+        .replace('/SONG', '')
+        .trim()
+        .split('#');
+
+      if (!songName) {
+        await this.sendMessage(group_openid, {
+          msg_type: 0,
+          content: '请输入歌曲名称，格式：/SONG 歌曲名',
+          msg_id: message?.msg_id,
+        });
+        return;
+      }
+
+      // 搜索歌曲
+      const songs = await this.musicService.searchSong(songName, source);
+      if (!songs || songs.length === 0) {
+        await this.sendMessage(group_openid, {
+          msg_type: 0,
+          content: `未找到歌曲: ${songName}`,
+          msg_id: message?.msg_id,
+        });
+        return;
+      }
+
+      // 获取第一首歌
+      const song = songs[0];
+
+      // 验证必要字段
+      if (!song.title || !song.jumpUrl) {
+        this.logger.error('歌曲信息不完整:', song);
+        await this.sendMessage(group_openid, {
+          msg_type: 0,
+          content: '抱歉，获取歌曲信息失败',
+          msg_id: message?.msg_id,
+        });
+        return;
+      }
+
+      // 使用 ark 模板 1 发送音乐卡片
+      const musicMessage = {
+        msg_type: 3, // ark 消息类型
+        msg_id: message?.msg_id,
+        ark: {
+          template_id: 1, // 音乐卡片模板
+          kv: [
+            {
+              key: '#PROMPT#',
+              value: '分享了一首歌曲',
+            },
+            {
+              key: '#TITLE#',
+              value: song.title,
+            },
+            {
+              key: '#DESC#',
+              value: song.singer || '未知歌手',
+            },
+            {
+              key: '#PLAY_URL#',
+              value: song.jumpUrl,
+            },
+            {
+              key: '#COVER#',
+              value:
+                song.imageUrl ||
+                'https://p2.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg',
+            },
+          ],
+        },
+      };
+
+      this.logger.debug(
+        '准备发送音乐信息:',
+        JSON.stringify(musicMessage, null, 2),
+      );
+
+      const response = await axios.post(
+        `https://api.sgroup.qq.com/v2/groups/${group_openid}/messages`,
+        musicMessage,
+        {
+          headers: {
+            Authorization: `QQBot ${this.accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      return response.data;
+    } catch (error) {
+      this.logger.error('发送音乐卡片失败:', {
+        errorCode: error.response?.data?.code,
+        errorMessage: error.response?.data?.message,
+        errorDetails: error.response?.data,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+      });
+
+      // 发送错误提示
+      await this.sendMessage(group_openid, {
+        msg_type: 0,
+        content: '抱歉，发送音乐卡片失败，请稍后重试',
+        msg_id: message?.msg_id,
+      });
+    }
+  }
+
   // 处理TTS消息
   async sendTTSMessage(group_openid: string, message?: BaseMessage) {
     if (!this.accessToken || Date.now() >= this.tokenExpireTime) {
@@ -97,7 +213,7 @@ export class BotService implements OnModuleInit {
       const textToConvert = message?.content;
 
       // 使用Azure生成语音
-      const audioBuffer = await this.azureService.textToSpeech(textToConvert);
+      const audioBuffer = await this.ttsService.textToSpeech(textToConvert);
 
       // 保存为临时文件
       const tempDir = this.TEMP_DIR;
@@ -108,7 +224,7 @@ export class BotService implements OnModuleInit {
       tempMp3Path = tempFilePath;
 
       const fileUrl =
-        await this.AudioConverterService.convertToSilk(tempFilePath);
+        await this.audioConverterService.convertToSilk(tempFilePath);
       tempSilkPath = fileUrl;
 
       // const fileUrl = 'xxx.com/uploads/audio/help.silk';

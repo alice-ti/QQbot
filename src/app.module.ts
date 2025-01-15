@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BotModule } from './bot/bot.module';
 import { TtsModule } from './modules/tts/tts.module';
+import { MusicModule } from './modules/music/music.module';
 import { SignatureMiddleware } from './middleware/signature/signature.middleware';
 import { QQSignatureMiddleware } from './middleware/auth/qqsignature.middleware';
 
@@ -20,6 +21,7 @@ import { QQSignatureMiddleware } from './middleware/auth/qqsignature.middleware'
     }),
     BotModule,
     TtsModule,
+    MusicModule,
   ],
   controllers: [AppController],
   providers: [AppService],
