@@ -49,6 +49,15 @@ export class BotController {
         }
       }
 
+      if (content.includes('有的兄弟')) {
+        await this.botService.sendTestTTSMessage(group_openid, {
+          msg_id: id,
+          content: 'bro',
+          msg_type: 7,
+        });
+        return;
+      }
+
       // 默认消息回复
       const replyMessage: ReplyTextMessage = {
         msg_type: 0,

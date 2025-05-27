@@ -200,6 +200,91 @@ export class BotService implements OnModuleInit {
     }
   }
 
+  // 发送固定测试语言
+  async sendTestTTSMessage(group_openid: string, message?: BaseMessage) {
+    if (!this.accessToken || Date.now() >= this.tokenExpireTime) {
+      await this.getAccessToken();
+    }
+
+    let tempSilkPath: string | null = null;
+    const content = message?.content;
+    const tempDir = this.TEMP_DIR;
+
+    try {
+      // 使用固定的测试音频文件路径
+      const testAudioPath = path.join(tempDir, `${content}.mp3`);
+
+      // 转换为silk格式
+      this.logger.debug('开始转换音频为 silk 格式...');
+      const fileUrl =
+        await this.audioConverterService.convertToSilk(testAudioPath);
+      tempSilkPath = fileUrl;
+      this.logger.debug('音频转换完成:', fileUrl);
+
+      const uploadUrl = `${this.NGROK_URL}/${fileUrl.replace(/\\/g, '/')}`;
+      this.logger.debug('准备上传音频, URL:', uploadUrl);
+
+      const uploadResponse = await axios
+        .post(
+          `https://api.sgroup.qq.com/v2/groups/${group_openid}/files`,
+          {
+            file_type: 3, // 3 表示语音
+            url: uploadUrl, // 音频文件的URL
+            srv_send_msg: false, // 设置为false，我们稍后手动发送消息
+          },
+          {
+            headers: {
+              Authorization: `QQBot ${this.accessToken}`,
+            },
+          },
+        )
+        .catch((e) => {
+          throw new Error('Upload failed: ' + e);
+        });
+      console.log('Upload response:', uploadResponse?.data);
+
+      // 5. 获取file_info
+      const fileInfo = uploadResponse.data.file_info;
+
+      // 6. 发送语音消息
+      await axios
+        .post(
+          `https://api.sgroup.qq.com/v2/groups/${group_openid}/messages`,
+          {
+            media: {
+              file_info: fileInfo,
+            },
+            ...message,
+          },
+          {
+            headers: {
+              Authorization: `QQBot ${this.accessToken}`,
+              'Content-Type': 'application/json',
+            },
+          },
+        )
+        .catch((e) => {
+          throw new Error('Send message failed: ' + e);
+        });
+    } finally {
+      // 只清理转换后的临时silk文件
+      try {
+        if (
+          tempSilkPath &&
+          (await fs.promises
+            .access(tempSilkPath)
+            .then(() => true)
+            .catch(() => false))
+        ) {
+          await fs.promises.unlink(tempSilkPath);
+          this.logger.debug('已清理临时 SILK 文件:', tempSilkPath);
+        }
+      } catch (cleanupError) {
+        this.logger.error('清理临时文件失败:', cleanupError);
+      }
+    }
+  }
+
   // 处理TTS消息
   async sendTTSMessage(group_openid: string, message?: BaseMessage) {
     if (!this.accessToken || Date.now() >= this.tokenExpireTime) {
