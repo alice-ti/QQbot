@@ -1,5 +1,13 @@
 # XAKU
 
+## 本地启动
+
+使用 pnpm 兼容模式下载依赖
+
+```bash
+pnpm install --shamefully-hoist
+```
+
 ## QQ
 
 - [QQ机器人管理端](https://q.qq.com/qqbot/#/developer/publish-config/function-config)
