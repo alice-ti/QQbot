@@ -29,7 +29,8 @@ import { QQSignatureMiddleware } from './middleware/auth/qqsignature.middleware'
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(QQSignatureMiddleware, SignatureMiddleware)
+      // .apply(QQSignatureMiddleware, SignatureMiddleware)
+      .apply(SignatureMiddleware)
       .forRoutes('bot/webhook');
   }
 }
