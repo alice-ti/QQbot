@@ -10,7 +10,7 @@ import { MusicModule } from './modules/music/music.module';
 import { SignatureMiddleware } from './middleware/signature/signature.middleware';
 import { QQSignatureMiddleware } from './middleware/auth/qqsignature.middleware';
 import { OllamaModule } from './ollama/ollama.module';
-import { JmcomicController } from './jmcomic/jmcomic.controller';
+import { JmcomicModule } from './jmcomic/jmcomic.module';
 
 @Module({
   imports: [
@@ -25,8 +25,9 @@ import { JmcomicController } from './jmcomic/jmcomic.controller';
     TtsModule,
     MusicModule,
     OllamaModule,
+    JmcomicModule
   ],
-  controllers: [AppController, JmcomicController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {

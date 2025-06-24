@@ -1,10 +1,10 @@
 import { Controller, Post, Body, Get, Param } from '@nestjs/common';
-import { ComicDownloadService } from './jmcomic-download.service';
+import { JmcomicDownloadService } from './jmcomic-download.service';
 import type { DownloadResult } from './dto/jmcomic-download.dto';
 
 @Controller('comic')
 export class JmcomicController {
-  constructor(private readonly comicDownloadService: ComicDownloadService) {}
+  constructor(private readonly comicDownloadService: JmcomicDownloadService) {}
 
   @Post('download')
   async downloadJmcomic(
@@ -14,6 +14,7 @@ export class JmcomicController {
     return await this.comicDownloadService.downloadComic(comicId);
   }
 
+  // id: 422866
   @Get('files/:comicId')
   async getComicFiles(@Param('comicId') comicId: string) {
     const files = await this.comicDownloadService.getComicFiles(comicId);

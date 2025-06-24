@@ -5,8 +5,8 @@ import * as fs from 'fs/promises';
 import type { DownloadResult } from './dto/jmcomic-download.dto';
 
 @Injectable()
-export class ComicDownloadService {
-  private readonly logger = new Logger(ComicDownloadService.name);
+export class JmcomicDownloadService {
+  private readonly logger = new Logger(JmcomicDownloadService.name);
   private readonly pythonScript = path.join(
     process.cwd(),
     'scripts',

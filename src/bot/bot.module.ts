@@ -7,9 +7,10 @@ import { SongCommandHandler } from './handlers/song-command.handler';
 import { AudioConverterService } from './services/ffmpeg.service';
 import { TtsModule } from '../modules/tts/tts.module';
 import { MusicModule } from '../modules/music/music.module';
+import { JmcomicModule } from '../jmcomic/jmcomic.module';
 
 @Module({
-  imports: [ConfigModule, TtsModule, MusicModule],
+  imports: [ConfigModule, TtsModule, MusicModule, JmcomicModule],
   controllers: [BotController],
   providers: [
     BotService,
