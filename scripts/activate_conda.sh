@@ -8,4 +8,3 @@ conda activate jm-downloader
 
 # 执行 Python 脚本
 python "$@"
-EOF
