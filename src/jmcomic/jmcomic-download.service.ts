@@ -7,6 +7,11 @@ import type { DownloadResult } from './dto/jmcomic-download.dto';
 @Injectable()
 export class JmcomicDownloadService {
   private readonly logger = new Logger(JmcomicDownloadService.name);
+  private readonly condaScript = path.join(
+    process.cwd(),
+    'scripts',
+    'activate_conda.sh',
+  );
   private readonly pythonScript = path.join(
     process.cwd(),
     'scripts',
@@ -22,6 +27,7 @@ export class JmcomicDownloadService {
   async downloadComic(comicId: string): Promise<DownloadResult> {
     return new Promise((resolve, reject) => {
       const pythonProcess = spawn('python', [
+        this.condaScript,
         this.pythonScript,
         comicId,
         this.downloadDir,
