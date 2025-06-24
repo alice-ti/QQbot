@@ -4,9 +4,9 @@ import axios from 'axios';
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { BaseMessage } from './bot.message.dto';
-import { TtsService } from '../modules/tts/tts.service';
-import { MusicService } from '../modules/music/music.service';
+import { BaseMessage } from '../dto/bot.message.dto';
+import { TtsService } from '../../modules/tts/tts.service';
+import { MusicService } from '../../modules/music/music.service';
 import { AudioConverterService } from './ffmpeg.service';
 
 @Injectable()

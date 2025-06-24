@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { BotService } from '../bot.service';
+import { BotService } from '../services/bot.service';
 import { CommandHandler } from '../interfaces/command-handler.interface';
-import { ReplyTextMessage } from '../bot.message.dto';
+import { ReplyTextMessage } from '../dto/bot.message.dto';
 
 @Injectable()
 export class SongCommandHandler implements CommandHandler {

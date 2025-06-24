@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BotService } from '../bot.service';
+import { BotService } from '../services/bot.service';
 import { CommandHandler } from '../interfaces/command-handler.interface';
 
 @Injectable()

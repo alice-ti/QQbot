@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Get } from '@nestjs/common';
-import { BotService } from './bot.service';
-import { ReplyTextMessage } from './bot.message.dto';
+import { BotService } from './services/bot.service';
+import { ReplyTextMessage } from './dto/bot.message.dto';
 import { BotCommand } from './constants/commands';
 import { TTSCommandHandler } from './handlers/tts-command.handler';
 import { SongCommandHandler } from './handlers/song-command.handler';
