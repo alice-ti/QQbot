@@ -28,7 +28,7 @@ plugins:
   before_photo:
     - plugin: skip_photo_with_few_images # 跳过下载章节图片数量过少的章节。一些韩漫的章节是公告，没有实际内容，就可以用该插件来跳过下载这些章节。
       kwargs:
-        at_least_image_count: 3 # 至少要有多少张图，才下载此章节
+        at_least_image_count: 2 # 至少要有多少张图，才下载此章节
 
   after_photo:
     # 插件来源：https://github.com/hect0x7/JMComic-Crawler-Python/pull/294
