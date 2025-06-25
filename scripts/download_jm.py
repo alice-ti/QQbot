@@ -17,11 +17,31 @@ def find_downloaded_comic_dir(base_path, comic_id):
     
     return None
 
-def download_comic(comic_id, download_path="./downloads", config_file="./download_jm_config.yml"):
+def download_comic(comic_id, download_path=None, config_file=None):
     """
     下载JM漫画
     """
     try:
+        # 获取脚本所在目录的绝对路径
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        # 如果传入了下载路径，使用传入的路径；否则使用脚本目录下的downloads
+        if download_path is None:
+            download_path = os.path.join(script_dir, "downloads")
+        
+        # 配置文件路径始终使用脚本同级目录
+        if config_file is None:
+            config_file = os.path.join(script_dir, "download_jm_config.yml")
+        
+        # 检查配置文件是否存在
+        if not os.path.exists(config_file):
+            return {
+                "success": False,
+                "comic_id": comic_id,
+                "error": f"配置文件不存在: {config_file}",
+                "message": "下载失败"
+            }
+        
         # 确保下载目录存在
         Path(download_path).mkdir(parents=True, exist_ok=True)
         
@@ -35,10 +55,8 @@ def download_comic(comic_id, download_path="./downloads", config_file="./downloa
         comic_dir = find_downloaded_comic_dir(download_path, comic_id)
 
         if not comic_dir:
-            # 下载可能失败了
             return {"success": False, "message": "未找到下载的文件"}
 
-        # 检查目录是否有内容
         if not any(Path(comic_dir).iterdir()):
             return {"success": False, "message": "下载目录为空"}
         
@@ -46,6 +64,9 @@ def download_comic(comic_id, download_path="./downloads", config_file="./downloa
             "success": True,
             "comic_id": comic_id,
             "download_path": comic_dir,
+            "actual_download_dir": download_path,  # 调试信息
+            "config_file_path": config_file,       # 调试信息
+            "script_dir": script_dir,              # 调试信息
             "message": "下载成功"
         }
         
@@ -56,6 +77,8 @@ def download_comic(comic_id, download_path="./downloads", config_file="./downloa
             "success": False,
             "comic_id": comic_id,
             "error": str(e),
+            "script_dir": os.path.dirname(os.path.abspath(__file__)),  # 调试信息
+            "config_file_attempted": config_file if 'config_file' in locals() else "未设置",
             "message": "下载失败"
         }
         return result
@@ -66,7 +89,8 @@ def main():
         sys.exit(1)
     
     comic_id = sys.argv[1]
-    download_path = sys.argv[2] if len(sys.argv) > 2 else "./downloads"
+    # 使用传入的下载路径，如果没有则为None（会使用默认路径）
+    download_path = sys.argv[2] if len(sys.argv) > 2 else None
     
     result = download_comic(comic_id, download_path)
     print(json.dumps(result, ensure_ascii=False))

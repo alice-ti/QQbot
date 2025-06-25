@@ -69,7 +69,7 @@ download:
 
 # 文件夹规则配置，决定图片文件存放在你的电脑上的哪个文件夹
 dir_rule:
-  base_dir: ./downloads/
+  base_dir: ../downloads/
   # 默认规则是: 根目录 / 章节标题 / 图片文件
   rule: Bd_Ptitle
 
@@ -86,6 +86,6 @@ plugins:
     # long_img插件是把所有图片合并为一个png长图，效果和img2pdf类似
     - plugin: long_img
       kwargs:
-        img_dir: ./long_images/ # 长图存放文件夹
+        img_dir: ../long_images/ # 长图存放文件夹
         filename_rule: Aname # 长图命名规则，同上
   
