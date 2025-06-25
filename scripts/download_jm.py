@@ -4,7 +4,20 @@ import os
 from pathlib import Path
 import jmcomic
 
-def download_comic(comic_id, download_path="./downloads"):
+def find_downloaded_comic_dir(base_path, comic_id):
+    """查找实际的下载目录"""
+    base_dir = Path(base_path)
+    if not base_dir.exists():
+        return None
+    
+    # 查找包含漫画ID的目录
+    for item in base_dir.iterdir():
+        if item.is_dir() and comic_id in item.name:
+            return str(item)
+    
+    return None
+
+def download_comic(comic_id, download_path="./downloads", config_file="./download_jm_config.yml"):
     """
     下载JM漫画
     """
@@ -13,18 +26,21 @@ def download_comic(comic_id, download_path="./downloads"):
         Path(download_path).mkdir(parents=True, exist_ok=True)
         
         # 配置下载选项
-        option = jmcomic.create_option(
-            dir_rule={
-                'rule': 'Bd_Pname',
-                'base_dir': download_path,
-            }
-        )
+        option = jmcomic.create_option_by_file(config_file)
         
         # 开始下载
         jmcomic.download_album(comic_id, option)
         
         # 获取下载的文件路径
-        comic_dir = os.path.join(download_path, f"JM{comic_id}")
+        comic_dir = find_downloaded_comic_dir(download_path, comic_id)
+
+        if not comic_dir:
+            # 下载可能失败了
+            return {"success": False, "message": "未找到下载的文件"}
+
+        # 检查目录是否有内容
+        if not any(Path(comic_dir).iterdir()):
+            return {"success": False, "message": "下载目录为空"}
         
         result = {
             "success": True,
