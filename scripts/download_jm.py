@@ -1,21 +1,10 @@
 import sys
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 import json
 import os
 from pathlib import Path
 import jmcomic
-
-def find_downloaded_comic_dir(base_path, comic_id):
-    """查找实际的下载目录"""
-    base_dir = Path(base_path)
-    if not base_dir.exists():
-        return None
-    
-    # 查找包含漫画ID的目录
-    for item in base_dir.iterdir():
-        if item.is_dir() and comic_id in item.name:
-            return str(item)
-    
-    return None
 
 def download_comic(comic_id, download_path=None, config_file=None):
     """
@@ -51,22 +40,9 @@ def download_comic(comic_id, download_path=None, config_file=None):
         # 开始下载
         jmcomic.download_album(comic_id, option)
         
-        # 获取下载的文件路径
-        comic_dir = find_downloaded_comic_dir(download_path, comic_id)
-
-        if not comic_dir:
-            return {"success": False, "message": "未找到下载的文件"}
-
-        if not any(Path(comic_dir).iterdir()):
-            return {"success": False, "message": "下载目录为空"}
-        
         result = {
             "success": True,
             "comic_id": comic_id,
-            "download_path": comic_dir,
-            "actual_download_dir": download_path,  # 调试信息
-            "config_file_path": config_file,       # 调试信息
-            "script_dir": script_dir,              # 调试信息
             "message": "下载成功"
         }
         
@@ -77,15 +53,13 @@ def download_comic(comic_id, download_path=None, config_file=None):
             "success": False,
             "comic_id": comic_id,
             "error": str(e),
-            "script_dir": os.path.dirname(os.path.abspath(__file__)),  # 调试信息
-            "config_file_attempted": config_file if 'config_file' in locals() else "未设置",
             "message": "下载失败"
         }
         return result
 
 def main():
     if len(sys.argv) < 2:
-        print(json.dumps({"success": False, "message": "缺少漫画ID参数"}))
+        print(json.dumps({"success": False, "message": "缺少漫画ID参数"}, ensure_ascii=False))
         sys.exit(1)
     
     comic_id = sys.argv[1]

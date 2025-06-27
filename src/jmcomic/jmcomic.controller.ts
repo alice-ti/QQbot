@@ -6,6 +6,13 @@ import type { DownloadResult } from './dto/jmcomic-download.dto';
 export class JmcomicController {
   constructor(private readonly comicDownloadService: JmcomicDownloadService) {}
 
+  @Get('download/:comicId')
+  async getDownload(
+    @Param('comicId') comicId: string,
+  ): Promise<DownloadResult> {
+    return await this.comicDownloadService.downloadComic(comicId);
+  }
+
   @Post('download')
   async downloadJmcomic(
     @Body() body: { comicId: string },

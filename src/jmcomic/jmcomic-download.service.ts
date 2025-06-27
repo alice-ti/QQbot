@@ -20,6 +20,31 @@ export class JmcomicDownloadService {
   private readonly downloadDir = path.join(process.cwd(), 'downloads');
 
   /**
+   * 从混合的输出中提取JSON结果
+   * @param stdout 完整的标准输出内容
+   * @returns 解析后的JSON对象
+   */
+  private extractJsonResult(stdout: string): DownloadResult {
+    // 查找最后一个JSON对象
+    // 使用正则表达式匹配JSON格式的内容
+    const jsonMatches = stdout.match(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g);
+    
+    if (!jsonMatches || jsonMatches.length === 0) {
+      throw new Error('未找到有效的JSON输出');
+    }
+    
+    // 取最后一个匹配的JSON（通常是我们的结果）
+    const lastJson = jsonMatches[jsonMatches.length - 1];
+    
+    try {
+      const result = JSON.parse(lastJson);
+      return result as DownloadResult;
+    } catch (error) {
+      throw new Error(`JSON解析失败: ${error.message}`);
+    }
+  }
+
+  /**
    * @description 下载指定漫画 使用[JMComic-Crawler-Python](https://github.com/hect0x7/JMComic-Crawler-Python)
    * @param comicId
    * @returns
@@ -32,6 +57,13 @@ export class JmcomicDownloadService {
         comicId,
         this.downloadDir,
       ]);
+
+      // Windows 调试使用
+      // const pythonProcess = spawn('python', [
+      //   this.pythonScript,
+      //   comicId,
+      //   this.downloadDir,
+      // ]);
 
       let stdout = '';
       let stderr = '';
@@ -47,8 +79,12 @@ export class JmcomicDownloadService {
       pythonProcess.on('close', (code) => {
         if (code === 0) {
           try {
-            const result = JSON.parse(stdout);
-            this.logger.log(`漫画 ${comicId} 下载结果:`, result);
+            this.logger.debug('Python脚本完整输出:', stdout);
+            
+            // 提取JSON结果
+            const result = this.extractJsonResult(stdout);
+            this.logger.log('提取的下载结果:', result);
+            
             resolve(result);
           } catch (error) {
             reject(new Error(`解析Python输出失败: ${error.message}`));
