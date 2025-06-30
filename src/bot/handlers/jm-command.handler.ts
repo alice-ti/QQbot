@@ -5,6 +5,7 @@ import { CommandHandler } from '../interfaces/command-handler.interface';
 import { JmcomicDownloadService } from '../../jmcomic/jmcomic-download.service';
 import * as fs from 'fs';
 import * as path from 'path';
+import { join } from 'path';
 import * as glob from 'glob';
 
 @Injectable()
@@ -17,7 +18,12 @@ export class JmCommandHandler implements CommandHandler {
     private readonly configService: ConfigService,
     private readonly jmcomicDownloadService: JmcomicDownloadService,
   ) {
-    this.PDF_BASE_DIR = path.resolve(__dirname, '../../../downloads/pdfs');
+    this.PDF_BASE_DIR = join(
+        process.cwd(),
+        '..',
+        'downloads',
+        'pdfs',
+    );
     this.JMCOMIC_URL = this.configService.get<string>('JMCOMIC_URL');
   }
 
@@ -54,6 +60,7 @@ export class JmCommandHandler implements CommandHandler {
 
     // 2. 查找本地PDF文件
     const pdfDir = glob.sync(path.join(this.PDF_BASE_DIR, `${comicId}_*`))[0];
+    console.log("Local PDF file Path", pdfDir)
     if (!pdfDir) {
       await this.botService.sendMessage(groupOpenid, {
         msg_type: 0,
