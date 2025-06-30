@@ -59,8 +59,8 @@ export class JmCommandHandler implements CommandHandler {
     }
 
     // 2. 查找本地PDF文件
-    const pdfDir = glob.sync(path.join(this.PDF_BASE_DIR, `${comicId}_*`))[0];
-    console.log("Local PDF file Path", pdfDir)
+    const pdfDir = glob.sync(join(this.PDF_BASE_DIR, comicId, '*'))[0];
+    console.log("Local PDF file Path", this.PDF_BASE_DIR, pdfDir)
     if (!pdfDir) {
       await this.botService.sendMessage(groupOpenid, {
         msg_type: 0,
