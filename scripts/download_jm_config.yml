@@ -19,7 +19,7 @@ download:
 
 # 文件夹规则配置，决定图片文件存放在你的电脑上的哪个文件夹
 dir_rule:
-  base_dir: ../downloads/
+  base_dir: ../downloads/images/
   # 默认规则是: 根目录 / 章节标题 / 图片文件
   rule: Bd_Aid_Ptitle # 根目录 / 本子ID / 章节标题 / 图片文件
 
@@ -33,8 +33,8 @@ plugins:
   after_album:
     - plugin: img2pdf
       kwargs:
-        pdf_dir: ../pdfs/
+        pdf_dir: ../downloads/pdfs/
         dir_rule:
-          base_dir: ../pdfs/
+          base_dir: ../downloads/pdfs/
           rule: Aid_Aname
         filename_rule: Aname

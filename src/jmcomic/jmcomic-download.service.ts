@@ -28,14 +28,14 @@ export class JmcomicDownloadService {
     // 查找最后一个JSON对象
     // 使用正则表达式匹配JSON格式的内容
     const jsonMatches = stdout.match(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g);
-    
+
     if (!jsonMatches || jsonMatches.length === 0) {
       throw new Error('未找到有效的JSON输出');
     }
-    
+
     // 取最后一个匹配的JSON（通常是我们的结果）
     const lastJson = jsonMatches[jsonMatches.length - 1];
-    
+
     try {
       const result = JSON.parse(lastJson);
       return result as DownloadResult;
@@ -80,11 +80,11 @@ export class JmcomicDownloadService {
         if (code === 0) {
           try {
             this.logger.debug('Python脚本完整输出:', stdout);
-            
+
             // 提取JSON结果
             const result = this.extractJsonResult(stdout);
             this.logger.log('提取的下载结果:', result);
-            
+
             resolve(result);
           } catch (error) {
             reject(new Error(`解析Python输出失败: ${error.message}`));

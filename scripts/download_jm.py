@@ -3,7 +3,6 @@ import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 import json
 import os
-from pathlib import Path
 import jmcomic
 
 def download_comic(comic_id, download_path=None, config_file=None):
@@ -31,8 +30,8 @@ def download_comic(comic_id, download_path=None, config_file=None):
                 "message": "下载失败"
             }
         
-        # 确保下载目录存在
-        Path(download_path).mkdir(parents=True, exist_ok=True)
+        # # 确保下载目录存在
+        # Path(download_path).mkdir(parents=True, exist_ok=True)
         
         # 配置下载选项
         option = jmcomic.create_option_by_file(config_file)
