@@ -4,6 +4,7 @@ import { ReplyTextMessage } from './dto/bot.message.dto';
 import { BotCommand } from './constants/commands';
 import { TTSCommandHandler } from './handlers/tts-command.handler';
 import { SongCommandHandler } from './handlers/song-command.handler';
+import { JmCommandHandler } from './handlers/jm-command.handler';
 import { CommandHandler } from './interfaces/command-handler.interface';
 
 @Controller('bot')
@@ -12,10 +13,12 @@ export class BotController {
 
   constructor(
     private readonly botService: BotService,
+    private readonly jmHandler: JmCommandHandler,
     private readonly ttsHandler: TTSCommandHandler,
     private readonly songHandler: SongCommandHandler,
   ) {
     this.commandHandlers = new Map<BotCommand, CommandHandler>([
+      [BotCommand.JM, jmHandler],
       [BotCommand.TTS, ttsHandler],
       [BotCommand.SONG, songHandler],
     ]);

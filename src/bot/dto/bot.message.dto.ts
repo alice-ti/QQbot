@@ -56,7 +56,7 @@ interface InlineKeyboard {
 
 // 基础消息接口
 export interface BaseMessage {
-  content: string;
+  content?: string;
   msg_type: MsgType;
   markdown?: {
     content: string;
@@ -87,6 +87,12 @@ export interface BaseMessage {
   event_id?: string;
   msg_id?: string;
   msg_seq?: number;
+  file_info?: {
+    file_id: string;
+    file_name: string;
+    file_size: number;
+    busid: string;
+  };
 }
 
 // 文本消息特定类型

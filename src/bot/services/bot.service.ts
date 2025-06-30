@@ -394,4 +394,74 @@ export class BotService implements OnModuleInit {
       }
     }
   }
+
+  // 发送文件消息
+  async sendFileMessage(
+    group_openid: string,
+    filePath: string,
+    fileType: number,
+    message?: BaseMessage,
+  ) {
+    if (!this.accessToken || Date.now() >= this.tokenExpireTime) {
+      await this.getAccessToken();
+    }
+
+    try {
+      // 检查文件是否存在
+      if (!fs.existsSync(filePath)) {
+        throw new Error(`文件不存在: ${filePath}`);
+      }
+
+      // 上传文件
+      const uploadResponse = await axios.post(
+        `https://api.sgroup.qq.com/v2/groups/${group_openid}/files`,
+        {
+          file_type: fileType,
+          url: filePath, // 文件的URL
+          srv_send_msg: false, // 设置为false，我们稍后手动发送消息
+        },
+        {
+          headers: {
+            Authorization: `QQBot ${this.accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      console.log('Upload response:', uploadResponse?.data);
+
+      // 获取file_info
+      const fileInfo = uploadResponse.data.file_info;
+
+      // 发送消息，根据官方文档，当msg_type=7时，content字段需要填入一个值
+      await axios
+        .post(
+          `https://api.sgroup.qq.com/v2/groups/${group_openid}/messages`,
+          {
+            media: {
+              file_info: fileInfo,
+            },
+            ...message,
+          },
+          {
+            headers: {
+              Authorization: `QQBot ${this.accessToken}`,
+              'Content-Type': 'application/json',
+            },
+          },
+        )
+        .catch((e) => {
+          throw new Error('Send message failed: ' + e);
+        });
+    } catch (error) {
+      this.logger.error('发送文件消息失败:', error);
+      // 发送错误提示
+      await this.sendMessage(group_openid, {
+        msg_type: 0,
+        content: '抱歉，发送文件失败，请稍后重试',
+        msg_id: message?.msg_id,
+      });
+      throw error;
+    }
+  }
 }
