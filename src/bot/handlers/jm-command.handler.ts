@@ -74,7 +74,7 @@ export class JmCommandHandler implements CommandHandler {
       fs.renameSync(file, newFile);
       file = newFile;
     }
-    const pdfUrl = `${this.JMCOMIC_URL}/${comicId}/${path.basename(file)}`;
+    const pdfUrl = `${this.JMCOMIC_URL}/pdfs/${comicId}/${path.basename(file)}`;
     console.log("PDF URL", pdfUrl)
     await this.botService.sendFileMessage(groupOpenid, pdfUrl, 3, {
       msg_type: 7,
