@@ -4,7 +4,7 @@ import { BotService } from '../services/bot.service';
 import { CommandHandler } from '../interfaces/command-handler.interface';
 import { JmcomicDownloadService } from '../../jmcomic/jmcomic-download.service';
 import * as fs from 'fs';
-import { join, basename } from 'path';
+import { join, basename, dirname } from 'path';
 import * as glob from 'glob';
 
 @Injectable()
@@ -114,7 +114,9 @@ export class JmCommandHandler implements CommandHandler {
     }
 
     console.log('Local Image files', files);
-    const imageUrl = `${this.JMCOMIC_URL}/images/${comicId}/${basename(test_file)}`;
+    const folderName = basename(dirname(test_file));
+    const imageUrl = `${this.JMCOMIC_URL}/images/${comicId}/${folderName}/${basename(test_file)}`;
+    console.log('Image URL', imageUrl);
     return imageUrl;
   }
 }
