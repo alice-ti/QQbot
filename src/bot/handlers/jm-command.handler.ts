@@ -4,13 +4,13 @@ import { BotService } from '../services/bot.service';
 import { CommandHandler } from '../interfaces/command-handler.interface';
 import { JmcomicDownloadService } from '../../jmcomic/jmcomic-download.service';
 import * as fs from 'fs';
-import * as path from 'path';
-import { join } from 'path';
+import { join, basename } from 'path';
 import * as glob from 'glob';
 
 @Injectable()
 export class JmCommandHandler implements CommandHandler {
   private readonly PDF_BASE_DIR: string;
+  private readonly IMAGE_BASE_DIR: string;
   private readonly JMCOMIC_URL: string;
 
   constructor(
@@ -18,12 +18,8 @@ export class JmCommandHandler implements CommandHandler {
     private readonly configService: ConfigService,
     private readonly jmcomicDownloadService: JmcomicDownloadService,
   ) {
-    this.PDF_BASE_DIR = join(
-        process.cwd(),
-        '..',
-        'downloads',
-        'pdfs',
-    );
+    this.PDF_BASE_DIR = join(process.cwd(), '..', 'downloads', 'pdfs');
+    this.IMAGE_BASE_DIR = join(process.cwd(), '..', 'downloads', 'images');
     this.JMCOMIC_URL = this.configService.get<string>('JMCOMIC_URL');
   }
 
@@ -58,9 +54,27 @@ export class JmCommandHandler implements CommandHandler {
       return;
     }
 
-    // 2. 查找本地PDF文件
+    const getFileFn = this.getImageFilePath.bind(this);
+
+    const fileUrl = await getFileFn(comicId, groupOpenid, messageId);
+    console.log('File URL', fileUrl);
+
+    if (!fileUrl) return;
+
+    await this.botService.sendFileMessage(groupOpenid, fileUrl, 3, {
+      msg_type: 7,
+      msg_id: messageId,
+    });
+  }
+
+  // 查找本地PDF文件
+  async getPDFfilePath(
+    comicId: string,
+    groupOpenid: string,
+    messageId: string,
+  ): Promise<string> {
     let file = glob.sync(join(this.PDF_BASE_DIR, comicId, '*'))[0];
-    console.log("Local PDF file Path", file)
+    console.log('Local PDF file Path', file);
     if (!file) {
       await this.botService.sendMessage(groupOpenid, {
         msg_type: 0,
@@ -74,11 +88,33 @@ export class JmCommandHandler implements CommandHandler {
       fs.renameSync(file, newFile);
       file = newFile;
     }
-    const pdfUrl = `${this.JMCOMIC_URL}/pdfs/${comicId}/${path.basename(file)}`;
-    console.log("PDF URL", pdfUrl)
-    await this.botService.sendFileMessage(groupOpenid, pdfUrl, 3, {
-      msg_type: 7,
-      msg_id: messageId,
-    });
+
+    const pdfUrl = `${this.JMCOMIC_URL}/pdfs/${comicId}/${basename(file)}`;
+    return pdfUrl;
+  }
+
+  // 查找本地图片文件
+  async getImageFilePath(
+    comicId: string,
+    groupOpenid: string,
+    messageId: string,
+  ): Promise<string> {
+    const files = glob.sync(
+      join(this.IMAGE_BASE_DIR, comicId, '*.{jpg,jpeg,png,gif,webp,svg}'),
+    );
+
+    let test_file = files[0];
+    if (!test_file) {
+      await this.botService.sendMessage(groupOpenid, {
+        msg_type: 0,
+        content: '未找到对应的图片文件',
+        msg_id: messageId,
+      });
+      return;
+    }
+
+    console.log('Local Image files', files);
+    const imageUrl = `${this.JMCOMIC_URL}/pdfs/${comicId}/${basename(test_file)}`;
+    return imageUrl;
   }
 }
