@@ -100,7 +100,7 @@ export class JmCommandHandler implements CommandHandler {
     messageId: string,
   ): Promise<string> {
     const files = glob.sync(
-      join(this.IMAGE_BASE_DIR, comicId, '*.{jpg,jpeg,png,gif,webp,svg}'),
+      join(this.IMAGE_BASE_DIR, comicId, '*', '*.{jpg,jpeg,png,gif,webp,svg}'),
     );
 
     let test_file = files[0];
@@ -114,7 +114,7 @@ export class JmCommandHandler implements CommandHandler {
     }
 
     console.log('Local Image files', files);
-    const imageUrl = `${this.JMCOMIC_URL}/pdfs/${comicId}/${basename(test_file)}`;
+    const imageUrl = `${this.JMCOMIC_URL}/images/${comicId}/${basename(test_file)}`;
     return imageUrl;
   }
 }
