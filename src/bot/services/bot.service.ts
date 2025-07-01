@@ -408,7 +408,7 @@ export class BotService implements OnModuleInit {
 
     try {
       // 检查文件是否存在
-      if (!fs.existsSync(filePath)) {
+      if (!filePath) {
         throw new Error(`文件不存在: ${filePath}`);
       }
 
