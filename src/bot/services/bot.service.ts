@@ -395,7 +395,13 @@ export class BotService implements OnModuleInit {
     }
   }
 
-  // 发送文件消息
+  /**
+   * @description [发送文件消息](https://bot.q.qq.com/wiki/develop/api-v2/server-inter/message/send-receive/rich-media.html#%E7%94%A8%E4%BA%8E%E7%BE%A4%E8%81%8A)
+   * @param group_openid
+   * @param filePath
+   * @param fileType 媒体类型：1 图片，2 视频，3 语音，4 文件（暂不开放）
+   * @param message
+   */
   async sendFileMessage(
     group_openid: string,
     filePath: string,

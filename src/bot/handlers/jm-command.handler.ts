@@ -61,7 +61,7 @@ export class JmCommandHandler implements CommandHandler {
 
     if (!fileUrl) return;
 
-    await this.botService.sendFileMessage(groupOpenid, fileUrl, 3, {
+    await this.botService.sendFileMessage(groupOpenid, fileUrl, 1, {
       msg_type: 7,
       msg_id: messageId,
     });
