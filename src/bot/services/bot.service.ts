@@ -464,7 +464,7 @@ export class BotService implements OnModuleInit {
           throw new Error('Send message failed: ' + e);
         });
     } catch (error) {
-      this.logger.error('发送文件消息失败:', error?.data);
+      this.logger.error('发送文件消息失败:', error?.response?.data);
       // 发送错误提示
       await this.sendMessage(group_openid, {
         msg_type: 0,

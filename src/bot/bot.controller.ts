@@ -32,6 +32,12 @@ export class BotController {
   @Post('webhook')
   async handleWebhook(@Body() body: any) {
     if (body.t === 'GROUP_AT_MESSAGE_CREATE') {
+      // 添加消息去重
+      if (this.isDuplicateMessage(body.d)) {
+        console.log('重复消息，跳过处理:', body.d.id);
+        return { code: 0 };
+      }
+
       const { id, group_openid, content } = body.d;
 
       // 获取指令
@@ -69,5 +75,25 @@ export class BotController {
       };
       await this.botService.sendMessage(group_openid, replyMessage);
     }
+  }
+
+  private processedMessages = new Set<string>();
+
+  private isDuplicateMessage(message: any): boolean {
+    const messageId = message.id;
+
+    if (this.processedMessages.has(messageId)) {
+      return true;
+    }
+
+    this.processedMessages.add(messageId);
+
+    // 清理过期消息ID，避免内存泄漏
+    if (this.processedMessages.size > 1000) {
+      const firstId = this.processedMessages.values().next().value;
+      this.processedMessages.delete(firstId);
+    }
+
+    return false;
   }
 }
