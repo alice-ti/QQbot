@@ -432,9 +432,18 @@ export class BotService implements OnModuleInit {
               Authorization: `QQBot ${this.accessToken}`,
               'Content-Type': 'application/json',
             },
+            timeout: 60 * 1000, // 设置超时时间为60秒
           },
         )
         .catch((e) => {
+          console.error('上传文件异常:', {
+            status: e.response?.status,
+            statusText: e.response?.statusText,
+            data: e.response?.data,
+            message: e.message,
+            code: e.code,
+          });
+
           throw new Error('Upload failed: ' + e);
         });
 
