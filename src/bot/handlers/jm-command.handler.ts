@@ -56,7 +56,7 @@ export class JmCommandHandler implements CommandHandler {
       return;
     }
 
-    const getFileFn = this.getFullImageFilePath.bind(this);
+    const getFileFn = this.getImageFilePath.bind(this);
 
     const fileUrl = await getFileFn(comicId, groupOpenid, messageId);
     console.log('File URL', fileUrl);
