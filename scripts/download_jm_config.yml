@@ -38,3 +38,7 @@ plugins:
           base_dir: ../downloads/pdfs/
           rule: Aid_Aname
         filename_rule: Aname
+    - plugin: long_img
+      kwargs:
+        img_dir: ../downloads/pictures/
+        filename_rule: Aid

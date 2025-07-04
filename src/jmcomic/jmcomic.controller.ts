@@ -27,13 +27,6 @@ export class JmcomicController {
     return await this.comicDownloadService.downloadComic(comicId);
   }
 
-  // id: 422866
-  @Get('files/:comicId')
-  async getComicFiles(@Param('comicId') comicId: string) {
-    const files = await this.comicDownloadService.getComicFiles(comicId);
-    return { comicId, files, count: files.length };
-  }
-
   @Get('getImage/*')
   async getImage(@Param('0') filePath: string, @Res() res: Response) {
     const fileInfo = await this.comicImageService.getImageFile(filePath);

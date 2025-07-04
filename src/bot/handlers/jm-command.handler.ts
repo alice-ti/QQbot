@@ -11,6 +11,7 @@ import * as glob from 'glob';
 export class JmCommandHandler implements CommandHandler {
   private readonly PDF_BASE_DIR: string;
   private readonly IMAGE_BASE_DIR: string;
+  private readonly FULL_IMAGE_BASE_DIR: string;
   private readonly JMCOMIC_URL: string;
 
   constructor(
@@ -20,6 +21,7 @@ export class JmCommandHandler implements CommandHandler {
   ) {
     this.PDF_BASE_DIR = join(process.cwd(), '..', 'downloads', 'pdfs');
     this.IMAGE_BASE_DIR = join(process.cwd(), '..', 'downloads', 'images');
+    this.FULL_IMAGE_BASE_DIR = join(process.cwd(), '..', 'downloads/pictures');
     this.JMCOMIC_URL = this.configService.get<string>('JMCOMIC_URL');
   }
 
@@ -54,7 +56,7 @@ export class JmCommandHandler implements CommandHandler {
       return;
     }
 
-    const getFileFn = this.getImageFilePath.bind(this);
+    const getFileFn = this.getFullImageFilePath.bind(this);
 
     const fileUrl = await getFileFn(comicId, groupOpenid, messageId);
     console.log('File URL', fileUrl);
@@ -89,7 +91,7 @@ export class JmCommandHandler implements CommandHandler {
       file = newFile;
     }
 
-    const pdfUrl = `${this.JMCOMIC_URL}/pdfs/${comicId}/${basename(file)}`;
+    const pdfUrl = `${this.PDF_BASE_DIR}/${comicId}/${basename(file)}`;
     return pdfUrl;
   }
 
@@ -116,6 +118,32 @@ export class JmCommandHandler implements CommandHandler {
     console.log('Local Image files', files);
     const folderName = basename(dirname(test_file));
     const imageUrl = `${this.JMCOMIC_URL}/images/${comicId}/${folderName}/${basename(test_file)}`;
+    console.log('Image URL', imageUrl);
+    return imageUrl;
+  }
+
+  // 获取整图文件
+  async getFullImageFilePath(
+    comicId: string,
+    groupOpenid: string,
+    messageId: string,
+  ): Promise<string> {
+    const files = glob.sync(
+      join(this.FULL_IMAGE_BASE_DIR, `${comicId}.{jpg,jpeg,png,gif,webp,svg}`),
+    );
+
+    let test_file = files[0];
+    if (!test_file) {
+      await this.botService.sendMessage(groupOpenid, {
+        msg_type: 0,
+        content: '未找到对应的图片文件',
+        msg_id: messageId,
+      });
+      return;
+    }
+
+    console.log('Local Image files', files);
+    const imageUrl = `${this.FULL_IMAGE_BASE_DIR}/${basename(test_file)}`;
     console.log('Image URL', imageUrl);
     return imageUrl;
   }

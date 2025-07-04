@@ -97,23 +97,5 @@ export class JmcomicDownloadService {
     });
   }
 
-  // 获取漫画文件列表
-  async getComicFiles(comicId: string): Promise<string[]> {
-    const comicDir = path.join(this.downloadDir, `JM${comicId}`);
-
-    try {
-      await fs.access(comicDir);
-      const files = await fs.readdir(comicDir, { recursive: true });
-
-      // 过滤图片文件
-      const imageFiles = files
-        .filter((file) => /\.(jpg|jpeg|png|gif|webp)$/i.test(file.toString()))
-        .map((file) => path.join(comicDir, file.toString()));
-
-      return imageFiles;
-    } catch (error) {
-      this.logger.error(`获取漫画文件失败: ${error.message}`);
-      return [];
-    }
-  }
+  // TODO ? 获取漫画文件列表
 }
