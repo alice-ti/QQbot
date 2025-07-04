@@ -91,7 +91,7 @@ export class JmCommandHandler implements CommandHandler {
       file = newFile;
     }
 
-    const pdfUrl = `${this.PDF_BASE_DIR}/${comicId}/${basename(file)}`;
+    const pdfUrl = `${this.JMCOMIC_URL}/pdfs/${comicId}/${basename(file)}`;
     return pdfUrl;
   }
 
@@ -143,7 +143,7 @@ export class JmCommandHandler implements CommandHandler {
     }
 
     console.log('Local Image files', files);
-    const imageUrl = `${this.FULL_IMAGE_BASE_DIR}/${basename(test_file)}`;
+    const imageUrl = `${this.JMCOMIC_URL}/pictures/${basename(test_file)}`;
     console.log('Image URL', imageUrl);
     return imageUrl;
   }
