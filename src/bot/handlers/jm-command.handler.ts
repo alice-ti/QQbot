@@ -44,7 +44,7 @@ export class JmCommandHandler implements CommandHandler {
       return;
     }
 
-    // 1. 先下载
+    // 下载
     try {
       await this.jmcomicDownloadService.downloadComic(comicId);
     } catch (e) {
@@ -56,21 +56,27 @@ export class JmCommandHandler implements CommandHandler {
       return;
     }
 
-    const getFileFn = this.getImageFilePath.bind(this);
+    const fileUrl = await this.getImageFilePath(
+      comicId,
+      groupOpenid,
+      messageId,
+    );
 
-    const fileUrl = await getFileFn(comicId, groupOpenid, messageId);
-    console.log('File URL', fileUrl);
-
-    if (!fileUrl) return;
-
-    await this.botService.sendFileMessage(groupOpenid, fileUrl, 1, {
-      msg_type: 7,
+    await this.botService.sendMessage(groupOpenid, {
+      msg_type: 0,
+      content: `漫画 ${comicId} 下载完成！\r\n${fileUrl}`,
       msg_id: messageId,
     });
+
+    // 获取图片文件路径
+    // 传送图片消息
+    // await this.botService.sendFileMessage(groupOpenid, fileUrl, 1, {
+    //   msg_type: 7,
+    //   msg_id: messageId,
+    // });
   }
 
-  // 查找本地PDF文件
-  async getPDFfilePath(
+  async getPdfFilePath(
     comicId: string,
     groupOpenid: string,
     messageId: string,
@@ -118,32 +124,6 @@ export class JmCommandHandler implements CommandHandler {
     console.log('Local Image files', files);
     const folderName = basename(dirname(test_file));
     const imageUrl = `${this.JMCOMIC_URL}/images/${comicId}/${folderName}/${basename(test_file)}`;
-    console.log('Image URL', imageUrl);
-    return imageUrl;
-  }
-
-  // 获取整图文件
-  async getFullImageFilePath(
-    comicId: string,
-    groupOpenid: string,
-    messageId: string,
-  ): Promise<string> {
-    const files = glob.sync(
-      join(this.FULL_IMAGE_BASE_DIR, `${comicId}.{jpg,jpeg,png,gif,webp,svg}`),
-    );
-
-    let test_file = files[0];
-    if (!test_file) {
-      await this.botService.sendMessage(groupOpenid, {
-        msg_type: 0,
-        content: '未找到对应的图片文件',
-        msg_id: messageId,
-      });
-      return;
-    }
-
-    console.log('Local Image files', files);
-    const imageUrl = `${this.JMCOMIC_URL}/pictures/${basename(test_file)}`;
     console.log('Image URL', imageUrl);
     return imageUrl;
   }

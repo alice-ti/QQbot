@@ -1,23 +1,30 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { spawn } from 'child_process';
-import * as path from 'path';
-import * as fs from 'fs/promises';
 import type { DownloadResult } from './dto/jmcomic-download.dto';
+import * as fs from 'fs';
+import { join } from 'path';
+import * as glob from 'glob';
 
 @Injectable()
 export class JmcomicDownloadService {
+  private readonly PDF_BASE_DIR: string;
+
   private readonly logger = new Logger(JmcomicDownloadService.name);
-  private readonly condaScript = path.join(
+  private readonly condaScript = join(
     process.cwd(),
     'scripts',
     'activate_conda.sh',
   );
-  private readonly pythonScript = path.join(
+  private readonly pythonScript = join(
     process.cwd(),
     'scripts',
     'download_jm.py',
   );
-  private readonly downloadDir = path.join(process.cwd(), 'downloads');
+  private readonly downloadDir = join(process.cwd(), 'downloads');
+
+  constructor() {
+    this.PDF_BASE_DIR = join(process.cwd(), '..', 'downloads', 'pdfs');
+  }
 
   /**
    * 从混合的输出中提取JSON结果
@@ -85,6 +92,8 @@ export class JmcomicDownloadService {
             const result = this.extractJsonResult(stdout);
             this.logger.log('提取的下载结果:', result);
 
+            this.renamePdfFile(comicId);
+
             resolve(result);
           } catch (error) {
             reject(new Error(`解析Python输出失败: ${error.message}`));
@@ -95,6 +104,19 @@ export class JmcomicDownloadService {
         }
       });
     });
+  }
+
+  async renamePdfFile(comicId: string): Promise<string> {
+    let file = glob.sync(join(this.PDF_BASE_DIR, comicId, '*'))[0];
+    console.log('Local PDF file Path', file);
+    if (!file) {
+      return '未找到对应的文件';
+    }
+
+    if (!file.endsWith('.pdf')) {
+      const newFile = file + '.pdf';
+      fs.renameSync(file, newFile);
+    }
   }
 
   // TODO ? 获取漫画文件列表
