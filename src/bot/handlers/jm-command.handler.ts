@@ -56,7 +56,7 @@ export class JmCommandHandler implements CommandHandler {
       return;
     }
 
-    const fileUrl = await this.getImageFilePath(
+    const fileUrl = await this.getPdfFilePath(
       comicId,
       groupOpenid,
       messageId,
