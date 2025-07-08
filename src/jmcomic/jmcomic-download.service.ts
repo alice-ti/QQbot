@@ -92,7 +92,9 @@ export class JmcomicDownloadService {
             const result = this.extractJsonResult(stdout);
             this.logger.log('提取的下载结果:', result);
 
-            this.renamePdfFile(comicId);
+            if (result?.success) {
+              this.renamePdfFile(comicId);
+            }
 
             resolve(result);
           } catch (error) {
@@ -107,15 +109,26 @@ export class JmcomicDownloadService {
   }
 
   async renamePdfFile(comicId: string): Promise<string> {
-    let file = glob.sync(join(this.PDF_BASE_DIR, comicId, '*'))[0];
-    console.log('Local PDF file Path', file);
-    if (!file) {
+    const dirPath = join(this.PDF_BASE_DIR, comicId);
+    let files = fs.readdirSync(dirPath);
+
+    console.log('PDF file :', fs.readdirSync(dirPath));
+
+    if (!files) {
       return '未找到对应的文件';
     }
 
-    if (!file.endsWith('.pdf')) {
-      const newFile = file + '.pdf';
-      fs.renameSync(file, newFile);
+    let fileName = files[0];
+    let fullPath = join(dirPath, fileName);
+
+    if (!fileName.endsWith('.pdf')) {
+      const newFileName = fileName + '.pdf';
+      const newFullPath = join(dirPath, newFileName);
+
+      console.log('Renaming file from:', fullPath);
+      console.log('Renaming file to:', newFullPath);
+
+      fs.renameSync(fullPath, newFullPath);
     }
   }
 
