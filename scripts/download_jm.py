@@ -1,6 +1,6 @@
 import sys
-# import io
-# sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 import json
 import os
 import jmcomic
@@ -42,7 +42,7 @@ def download_comic(comic_id, download_path=None, config_file=None):
         result = {
             "success": True,
             "comic_id": comic_id,
-            "message": "Successfully downloaded !"
+            "message": "success !"
         }
         
         return result
