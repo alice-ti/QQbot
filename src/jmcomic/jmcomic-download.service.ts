@@ -59,7 +59,8 @@ export class JmcomicDownloadService {
   async downloadComic(comicId: string): Promise<DownloadResult> {
     return new Promise((resolve, reject) => {
       // 直接调用激活脚本，传递 Python 脚本和参数
-      const pythonProcess = spawn(this.condaScript, [
+      const pythonProcess = spawn('bash', [
+        this.condaScript,
         this.pythonScript,
         comicId,
         this.downloadDir,
