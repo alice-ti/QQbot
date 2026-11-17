@@ -1,16 +1,20 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { BotModule } from './bot/bot.module';
-import { TtsModule } from './modules/tts/tts.module';
-import { MusicModule } from './modules/music/music.module';
-import { SignatureMiddleware } from './middleware/signature/signature.middleware';
-import { QQSignatureMiddleware } from './middleware/auth/qqsignature.middleware';
-import { OllamaModule } from './ollama/ollama.module';
-import { JmcomicModule } from './jmcomic/jmcomic.module';
+import { join } from 'node:path';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { AppController } from './app.controller.js';
+import { AppService } from './app.service.js';
+import { BotModule } from './modules/bot/bot.module.js';
+import { TtsModule } from './modules/tts/tts.module.js';
+import { MusicModule } from './modules/music/music.module.js';
+import { OllamaModule } from './modules/ollama/ollama.module.js';
+import { JmcomicModule } from './modules/jmcomic/jmcomic.module.js';
+import { WebhookModule } from './modules/webhook/webhook.module.js';
+import { WebhookMiddleware } from './modules/webhook/webhook.middleware.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 @Module({
   imports: [
@@ -25,16 +29,14 @@ import { JmcomicModule } from './jmcomic/jmcomic.module';
     TtsModule,
     MusicModule,
     OllamaModule,
-    JmcomicModule
+    JmcomicModule,
+    WebhookModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      // .apply(QQSignatureMiddleware, SignatureMiddleware)
-      .apply(SignatureMiddleware)
-      .forRoutes('bot/webhook');
+    consumer.apply(WebhookMiddleware).forRoutes('bot/webhook');
   }
 }

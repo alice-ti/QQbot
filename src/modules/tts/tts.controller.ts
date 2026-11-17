@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Res, Get } from '@nestjs/common';
-import { Response } from 'express';
-import { TtsService } from './tts.service';
+import type { Response } from 'express';
+import { TtsService } from './tts.service.js';
 
 @Controller('tts')
 export class TtsController {

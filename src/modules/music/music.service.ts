@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { QQMusicProvider } from './providers/qq-music.provider';
-import { NeteaseMusicProvider } from './providers/netease-music.provider';
-import { SongInfo } from './interfaces/music-provider.interface';
+import { QQMusicProvider } from './providers/qq-music.provider.js';
+import { NeteaseMusicProvider } from './providers/netease-music.provider.js';
+import { SongInfo } from './interfaces/music-provider.interface.js';
 
 @Injectable()
 export class MusicService {
